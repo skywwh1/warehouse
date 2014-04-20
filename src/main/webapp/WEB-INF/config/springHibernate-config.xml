@@ -15,7 +15,6 @@
         http://www.springframework.org/schema/aop/spring-aop.xsd   
         http://www.springframework.org/schema/tx   
         http://www.springframework.org/schema/tx/spring-tx.xsd">  
-    <!-- 加载配置文件 -->  
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
         <property name="locations">  
            <list>  
@@ -23,27 +22,20 @@
             </list>  
         </property>  
     </bean>  
-    <!-- 配置c3p0数据源 -->  
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">  
         <property name="driverClass" value="${jdbc.driverClassName}" />  
         <property name="jdbcUrl" value="${jdbc.url}" />  
         <property name="user" value="${jdbc.username}" />  
         <property name="password" value="${jdbc.password}" />  
-          <!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
         <property name="acquireIncrement" value="${pool.acquireIncrement}" /> 
-        <!--初始化时获取三个连接，取值应在minPoolSize与maxPoolSize之间。Default: 3 --> 
         <property name="initialPoolSize" value="${pool.initialPoolSize}" />  
         <property name="minPoolSize" value="${pool.minPoolSize}" />  
         <property name="maxPoolSize" value="${pool.maxPoolSize}" />  
-        <!--连接关闭时默认将所有未提交的操作回滚。Default: false -->
         <property name="autoCommitOnClose" value="${pool.autoCommitOnClose}" />  
     </bean>  
-    <!-- hibernate的annotation会话管理,依赖hibernate、hibernate-annotations、persistence-api包  -->  
     <bean id="sessionFactory"  
         class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">  
         <property name="dataSource" ref="dataSource" />  
-        <!-- packagesToScan可以自动搜索某个package的全部标记@Entity class  
-        -->  
         <property name="packagesToScan">  
             <list>  
                 <value>org.wry.dao.entity</value>  
@@ -54,16 +46,7 @@
                 <prop key="hibernate.dialect">${hibernate.dialect}</prop>  
                 <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>  
                 <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>  
-				<!-- 是否自动创建数据库表  他主要有一下几个值：  
-				validate:当sessionFactory创建时，自动验证或者schema定义导入数据库。  
-				create:每次启动都drop掉原来的schema，创建新的。  
-				create-drop:当sessionFactory明确关闭时，drop掉schema。  
-				update(常用):如果没有schema就创建，有就更新。 -->  
                 <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>  
-                <!-- 	配置此处 sessionFactory.getCurrentSession()可以完成一系列的工作，当调用时，  
-						hibernate将session绑定到当前线程，事务结束后，hibernate  
-						将session从当前线程中释放，并且关闭session。当再次调用getCurrentSession  
-						()时，将得到一个新的session，并重新开始这一系列工作。-->  
                 <prop key="hibernate.current_session_context_class">${hibernate.current_session_context_class}</prop>  
             </props>  
         </property>  
@@ -72,13 +55,11 @@
     <bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">  
         <property name="sessionFactory" ref="sessionFactory" />  
     </bean>  
-    <!-- 配置事务管理器 -->  
     <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">  
         <property name="sessionFactory">  
                 <ref bean="sessionFactory" />  
         </property>  
     </bean>  
-    <!-- 配置事务的传播特性 -->  
     <tx:advice id="txAdvice" transaction-manager="transactionManager">  
         <tx:attributes>  
             <tx:method name="save*" propagation="REQUIRED" />  
@@ -89,7 +70,6 @@
             <tx:method name="*" read-only="true" />  
         </tx:attributes>  
     </tx:advice>  
-    <!--给aop切面加入事务,依赖aspectjweaver.jar  -->  
     <aop:config>  
         <aop:pointcut id="allServiceMethod" expression="execution(* com.cpkf.notpad.server.**.*(..))" />  
         <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice" />  

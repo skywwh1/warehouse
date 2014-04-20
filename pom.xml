@@ -7,7 +7,6 @@
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>warehouse</name>
-	<!-- jetty插件 -->
 	<build>
 		<finalName>warehouse</finalName>
 		<plugins>
